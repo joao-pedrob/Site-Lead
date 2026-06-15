@@ -4,6 +4,11 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@theme {
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
 /*
  * Design system definition.
  *
@@ -63,25 +68,37 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
+  /* Joaquim Empilhadeiras — industrial warm */
+  --background: oklch(0.985 0.008 80);
+  --foreground: oklch(0.18 0.03 250);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
+  --card-foreground: oklch(0.18 0.03 250);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
+  --popover-foreground: oklch(0.18 0.03 250);
+  --primary: oklch(0.72 0.19 50);
+  --primary-foreground: oklch(0.15 0.02 250);
+  --secondary: oklch(0.22 0.04 250);
+  --secondary-foreground: oklch(0.98 0.005 80);
+  --muted: oklch(0.95 0.012 80);
+  --muted-foreground: oklch(0.45 0.03 250);
+  --accent: oklch(0.82 0.16 85);
+  --accent-foreground: oklch(0.15 0.02 250);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
+  --border: oklch(0.9 0.015 80);
+  --input: oklch(0.92 0.012 80);
+  --ring: oklch(0.72 0.19 50);
+
+  --ink: oklch(0.16 0.025 250);
+  --ink-soft: oklch(0.28 0.035 250);
+  --ember: oklch(0.68 0.22 38);
+  --amber: oklch(0.82 0.17 78);
+  --cream: oklch(0.97 0.018 85);
+
+  --gradient-ember: linear-gradient(135deg, oklch(0.68 0.22 38), oklch(0.82 0.17 78));
+  --gradient-ink: linear-gradient(160deg, oklch(0.16 0.025 250), oklch(0.24 0.04 250));
+  --shadow-ember: 0 20px 50px -20px oklch(0.68 0.22 38 / 0.55);
+  --shadow-soft: 0 10px 30px -12px oklch(0.16 0.025 250 / 0.18);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -140,5 +157,46 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
   }
 }
+
+@utility text-balance { text-wrap: balance; }
+@utility bg-gradient-ember { background-image: var(--gradient-ember); }
+@utility bg-gradient-ink { background-image: var(--gradient-ink); }
+@utility shadow-ember { box-shadow: var(--shadow-ember); }
+@utility shadow-soft { box-shadow: var(--shadow-soft); }
+@utility text-ember { color: var(--ember); }
+@utility bg-ink { background-color: var(--ink); }
+@utility text-ink { color: var(--ink); }
+@utility bg-cream { background-color: var(--cream); }
+
+@utility noise-bg {
+  position: relative;
+  &::before {
+    content: "";
+    position: absolute; inset: 0;
+    background-image: radial-gradient(oklch(0 0 0 / 0.04) 1px, transparent 1px);
+    background-size: 4px 4px;
+    pointer-events: none;
+    mix-blend-mode: multiply;
+  }
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+@utility animate-float { animation: float-slow 6s ease-in-out infinite; }
+
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 oklch(0.7 0.2 142 / 0.5); }
+  70% { box-shadow: 0 0 0 18px oklch(0.7 0.2 142 / 0); }
+  100% { box-shadow: 0 0 0 0 oklch(0.7 0.2 142 / 0); }
+}
+@utility animate-pulse-ring { animation: pulse-ring 2s ease-out infinite; }
