@@ -7,6 +7,7 @@ import {
 import { z } from "zod";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
+import { saveLead } from "@/lib/leads-store";
 import heroImg from "@/assets/hero-forklift.jpg";
 import partsImg from "@/assets/parts.jpg";
 import maintenanceImg from "@/assets/maintenance.jpg";
@@ -31,8 +32,17 @@ const leadSchema = z.object({
   telefone: z.string().trim().min(8, "Telefone inválido").max(20),
   email: z.string().trim().email("E-mail inválido").max(120).or(z.literal("")),
   localizacao: z.string().trim().min(2, "Informe sua cidade").max(120),
+  tipoServico: z.string().trim().min(2, "Selecione um tipo de serviço").max(60),
   descricao: z.string().trim().min(10, "Descreva o serviço (mín. 10 caracteres)").max(1000),
 });
+
+const TIPOS_SERVICO = [
+  "Venda de peças",
+  "Manutenção preventiva",
+  "Reparo emergencial",
+  "Diagnóstico técnico",
+  "Outro",
+];
 
 function Index() {
   return (
@@ -342,7 +352,9 @@ function WhyUs() {
 
 /* ---------------- LEAD FORM ---------------- */
 function LeadForm() {
-  const [form, setForm] = useState({ nome: "", telefone: "", email: "", localizacao: "", descricao: "" });
+  const [form, setForm] = useState({
+    nome: "", telefone: "", email: "", localizacao: "", tipoServico: "", descricao: "",
+  });
   const [loading, setLoading] = useState(false);
 
   function update<K extends keyof typeof form>(k: K, v: string) {
@@ -357,18 +369,24 @@ function LeadForm() {
       return;
     }
     setLoading(true);
+    const lead = saveLead(parsed.data);
     const msg = encodeURIComponent(
-      `Olá, Joaquim Empilhadeiras!%0A%0A` +
-      `*Nome:* ${parsed.data.nome}%0A` +
-      `*Telefone:* ${parsed.data.telefone}%0A` +
-      `*E-mail:* ${parsed.data.email || "—"}%0A` +
-      `*Localização:* ${parsed.data.localizacao}%0A` +
-      `*Serviço:* ${parsed.data.descricao}`
+      `Olá, Joaquim Empilhadeiras! 👋\n\n` +
+      `Acabei de enviar uma solicitação pelo site:\n\n` +
+      `🧾 *Protocolo:* ${lead.id.slice(0, 8).toUpperCase()}\n` +
+      `🕒 *Enviado em:* ${new Date(lead.createdAt).toLocaleString("pt-BR")}\n\n` +
+      `👤 *Nome:* ${parsed.data.nome}\n` +
+      `📱 *Telefone:* ${parsed.data.telefone}\n` +
+      `📧 *E-mail:* ${parsed.data.email || "—"}\n` +
+      `📍 *Localização:* ${parsed.data.localizacao}\n` +
+      `🔧 *Tipo de serviço:* ${parsed.data.tipoServico}\n\n` +
+      `📝 *Descrição:*\n${parsed.data.descricao}\n\n` +
+      `Aguardo retorno, obrigado!`
     );
     setTimeout(() => {
       window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`, "_blank");
       toast.success("Solicitação enviada! Estamos te redirecionando ao WhatsApp.");
-      setForm({ nome: "", telefone: "", email: "", localizacao: "", descricao: "" });
+      setForm({ nome: "", telefone: "", email: "", localizacao: "", tipoServico: "", descricao: "" });
       setLoading(false);
     }, 400);
   }
@@ -424,6 +442,19 @@ function LeadForm() {
             <Field label="WhatsApp / Telefone *" value={form.telefone} onChange={(v) => update("telefone", v)} placeholder="(11) 99999-9999" />
             <Field label="E-mail" value={form.email} onChange={(v) => update("email", v)} placeholder="opcional" type="email" />
             <Field label="Cidade / Localização *" value={form.localizacao} onChange={(v) => update("localizacao", v)} placeholder="Cidade - UF" />
+          </div>
+          <div className="mt-4">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-ink-soft mb-1.5">
+              Tipo de serviço *
+            </label>
+            <select
+              value={form.tipoServico}
+              onChange={(e) => update("tipoServico", e.target.value)}
+              className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-ember/40 focus:border-ember"
+            >
+              <option value="">Selecione...</option>
+              {TIPOS_SERVICO.map((t) => <option key={t} value={t}>{t}</option>)}
+            </select>
           </div>
           <div className="mt-4">
             <label className="block text-xs font-semibold uppercase tracking-wider text-ink-soft mb-1.5">

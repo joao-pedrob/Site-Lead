@@ -64,6 +64,13 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  /* Brand semantic colors — registering here exposes them as
+     bg-*/text-*/border-* utilities with opacity modifier support. */
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ember: var(--ember);
+  --color-amber: var(--amber);
+  --color-cream: var(--cream);
 }
 
 :root {
@@ -171,10 +178,6 @@
 @utility bg-gradient-ink { background-image: var(--gradient-ink); }
 @utility shadow-ember { box-shadow: var(--shadow-ember); }
 @utility shadow-soft { box-shadow: var(--shadow-soft); }
-@utility text-ember { color: var(--ember); }
-@utility bg-ink { background-color: var(--ink); }
-@utility text-ink { color: var(--ink); }
-@utility bg-cream { background-color: var(--cream); }
 
 @utility noise-bg {
   position: relative;
