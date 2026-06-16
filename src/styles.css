@@ -178,10 +178,6 @@
 @utility bg-gradient-ink { background-image: var(--gradient-ink); }
 @utility shadow-ember { box-shadow: var(--shadow-ember); }
 @utility shadow-soft { box-shadow: var(--shadow-soft); }
-@utility text-ember { color: var(--ember); }
-@utility bg-ink { background-color: var(--ink); }
-@utility text-ink { color: var(--ink); }
-@utility bg-cream { background-color: var(--cream); }
 
 @utility noise-bg {
   position: relative;
