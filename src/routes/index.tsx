@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Wrench, Cog, ShieldCheck, Truck, Phone, MapPin, MessageCircle,
   ArrowRight, CheckCircle2, Clock, Sparkles, Star, Send,
@@ -11,6 +11,7 @@ import { saveLead } from "@/lib/leads-store";
 import heroImg from "@/assets/hero-forklift.jpg";
 import partsImg from "@/assets/parts.jpg";
 import maintenanceImg from "@/assets/maintenance.jpg";
+import teamJoaquimImg from "@/assets/team-joaquim.jpeg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -24,8 +25,8 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const WHATSAPP_NUMBER = "5511999999999"; // Substituir pelo número real
-const WHATSAPP_DISPLAY = "(11) 99999-9999";
+const WHATSAPP_NUMBER = "5585999999999"; // Substituir pelo número real (DDD 85 — Ceará)
+const WHATSAPP_DISPLAY = "(85) 99999-9999";
 
 const leadSchema = z.object({
   nome: z.string().trim().min(2, "Informe seu nome").max(100),
@@ -54,6 +55,7 @@ function Index() {
       <Services />
       <HowItWorks />
       <WhyUs />
+      <Team />
       <LeadForm />
       <Testimonials />
       <Footer />
@@ -80,6 +82,7 @@ function Nav() {
           <a href="#servicos" className="hover:text-ember transition-colors">Serviços</a>
           <a href="#como-funciona" className="hover:text-ember transition-colors">Como funciona</a>
           <a href="#diferenciais" className="hover:text-ember transition-colors">Diferenciais</a>
+          <a href="#equipe" className="hover:text-ember transition-colors">Equipe</a>
           <a href="#contato" className="hover:text-ember transition-colors">Contato</a>
         </nav>
         <a
@@ -104,16 +107,21 @@ function Hero() {
       </div>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 pt-16 pb-24 lg:pt-24 lg:pb-32 grid lg:grid-cols-[1.05fr_1fr] gap-12 lg:gap-16 items-center">
         <div>
-          <span className="inline-flex items-center gap-2 rounded-full border border-border bg-background/70 px-3 py-1 text-xs font-semibold text-ink-soft">
-            <Sparkles className="h-3.5 w-3.5 text-ember" /> Atendimento técnico desde 2008
-          </span>
+          <div className="flex flex-col items-start gap-2">
+            <span className="inline-flex items-center gap-2 rounded-full border border-border bg-background/70 px-3 py-1 text-sm font-semibold text-ink-soft">
+              <Sparkles className="h-3.5 w-3.5 text-ember" /> Atendimento técnico desde 2008
+            </span>
+            <span className="inline-flex items-center gap-2 rounded-full border border-border bg-background/70 px-3 py-1 text-sm font-semibold text-ink-soft">
+              <MapPin className="h-3.5 w-3.5 text-ember" /> Atendimentos realizados principalmente na região do Ceará
+            </span>
+          </div>
           <h1 className="mt-5 text-4xl sm:text-5xl lg:text-[64px] leading-[1.02] font-bold text-balance text-ink">
             Sua empilhadeira <span className="relative inline-block">
               <span className="relative z-10">parada</span>
               <span className="absolute inset-x-0 bottom-1 h-3 bg-amber/70 -z-0 rounded" />
             </span> custa caro.
             <br className="hidden sm:block" />
-            <span className="bg-gradient-ember bg-clip-text text-transparent">A gente devolve o movimento.</span>
+            <span className="bg-gradient-ember bg-clip-text text-transparent">Rodando de novo ainda hoje.</span>
           </h1>
           <p className="mt-6 text-lg text-ink-soft max-w-xl leading-relaxed">
             Peças originais, manutenção preventiva e reparos rápidos para sua frota. Solicite orçamento e fale direto com um técnico em minutos.
@@ -127,18 +135,6 @@ function Hero() {
               className="inline-flex items-center gap-2 rounded-full bg-gradient-ember text-ink px-6 py-3.5 text-sm font-semibold shadow-ember hover:scale-[1.02] transition-transform">
               <MessageCircle className="h-4 w-4" /> Falar no WhatsApp
             </a>
-          </div>
-          <div className="mt-10 flex flex-wrap gap-x-8 gap-y-3 text-sm">
-            {[
-              { k: "+1.200", v: "frotas atendidas" },
-              { k: "24h", v: "resposta média" },
-              { k: "98%", v: "clientes satisfeitos" },
-            ].map((s) => (
-              <div key={s.v} className="flex items-baseline gap-2">
-                <span className="font-display text-2xl font-bold text-ember">{s.k}</span>
-                <span className="text-ink-soft">{s.v}</span>
-              </div>
-            ))}
           </div>
         </div>
         <div className="relative">
@@ -324,15 +320,18 @@ function WhyUs() {
             <img src={maintenanceImg} alt="Técnico realizando manutenção" className="w-full h-full object-cover" loading="lazy" width={1200} height={900} />
           </div>
           <div className="absolute -bottom-6 -right-6 bg-gradient-ember rounded-2xl p-5 shadow-ember max-w-[220px]">
-            <div className="font-display text-3xl font-bold text-ink">17 anos</div>
+            <div className="font-display text-3xl font-bold text-ink">18 anos</div>
             <div className="text-sm text-ink/80">de chão de fábrica e oficina</div>
           </div>
         </div>
         <div>
           <span className="text-xs uppercase tracking-[0.2em] text-ember font-semibold">Por que Joaquim</span>
           <h2 className="mt-3 text-4xl sm:text-5xl font-bold text-ink text-balance">
-            Confiança não se improvisa — se constrói no torno.
+            Comecei em 2008 com uma caixa de ferramentas na garupa da moto.
           </h2>
+          <p className="mt-4 text-ink-soft">
+            Hoje a equipe é maior, mas o jeito de atender continua o mesmo: aparecer rápido e resolver de verdade.
+          </p>
           <div className="mt-8 grid sm:grid-cols-2 gap-5">
             {bullets.map((b) => (
               <div key={b.title} className="rounded-2xl border border-border p-5 bg-card hover:border-ember/40 transition-colors">
@@ -347,6 +346,128 @@ function WhyUs() {
         </div>
       </div>
     </section>
+  );
+}
+
+/* ---------------- REVEAL ON SCROLL ---------------- */
+function useReveal<T extends HTMLElement>() {
+  const ref = useRef<T | null>(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            setVisible(true);
+            io.disconnect();
+          }
+        });
+      },
+      { threshold: 0.25 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+  return { ref, visible };
+}
+
+/* ---------------- TEAM ---------------- */
+type Member = {
+  name: string;
+  role: string;
+  years: string;
+  quote: string;
+  img?: string;
+};
+
+function Team() {
+  // TODO: substituir pela foto real de cada pessoa (img) quando o cliente enviar.
+  const members: Member[] = [
+    {
+      name: "Joaquim Andrade",
+      role: "Fundador & Mestre de oficina",
+      years: "32 anos com empilhadeiras",
+      quote: "Máquina parada é prejuízo. A gente trata cada chamado como se fosse o nosso próprio galpão.",
+    },
+    {
+      name: "Rafael Moura",
+      role: "Coordenador técnico",
+      years: "12 anos na equipe",
+      quote: "Gosto do problema difícil. O cliente fica tranquilo quando entende o que estamos fazendo na máquina dele.",
+    },
+    {
+      name: "Carla Nogueira",
+      role: "Atendimento e peças",
+      years: "7 anos com a Joaquim",
+      quote: "Atendo no WhatsApp como atenderia um vizinho. Resposta rápida, sem enrolação e com a peça certa.",
+    },
+    {
+      name: "Diego Tavares",
+      role: "Técnico de campo",
+      years: "9 anos em manutenção",
+      quote: "Saio com a van abastecida de peças. Quando dá pra resolver no mesmo dia, a gente resolve no mesmo dia.",
+    },
+    {
+      // TODO: confirmar sobrenome e tempo de empresa com o cliente.
+      name: "Joaquim",
+      role: "Atendimento e notas fiscais",
+      years: "Equipe Joaquim Empilhadeiras",
+      quote: "Cuido do atendimento e da nota fiscal de cada serviço, e ainda acompanho o pessoal nas visitas de manutenção pela região.",
+      img: teamJoaquimImg,
+    },
+  ];
+  return (
+    <section id="equipe" className="border-t border-border">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 pt-24 pb-8 text-center">
+        <span className="text-xs uppercase tracking-[0.2em] text-ember font-semibold">Conheça-nos</span>
+        <h2 className="mt-3 text-4xl sm:text-5xl lg:text-6xl font-bold text-ink text-balance">
+          Gente de oficina, atendimento de gente.
+        </h2>
+        <p className="mt-4 text-ink-soft max-w-2xl mx-auto">
+          Role para conhecer cada pessoa que faz a sua frota seguir em movimento.
+        </p>
+      </div>
+      {members.map((m, i) => (
+        <TeamRow key={m.name} m={m} index={i} />
+      ))}
+    </section>
+  );
+}
+
+function TeamRow({ m, index }: { m: Member; index: number }) {
+  const { ref, visible } = useReveal<HTMLDivElement>();
+  const reversed = index % 2 === 1;
+  const initials = m.name.split(" ").map((n) => n[0]).slice(0, 2).join("");
+
+  return (
+    <div
+      ref={ref}
+      className={`reveal-up ${visible ? "reveal-up-visible" : ""} mx-auto max-w-7xl px-4 sm:px-6 py-12 grid lg:grid-cols-2 gap-10 items-center`}
+    >
+      <div className={reversed ? "lg:order-2" : ""}>
+        {m.img ? (
+          <img
+            src={m.img}
+            alt={m.name}
+            className="aspect-square w-full max-w-sm mx-auto rounded-3xl object-cover shadow-soft"
+          />
+        ) : (
+          <div className="aspect-square w-full max-w-sm mx-auto rounded-3xl bg-gradient-ember shadow-ember grid place-items-center">
+            <span className="text-6xl font-bold text-ink">{initials}</span>
+          </div>
+        )}
+      </div>
+      <div className={reversed ? "lg:order-1" : ""}>
+        <span className="text-xs uppercase tracking-[0.2em] text-ember font-semibold">{m.years}</span>
+        <h3 className="mt-2 text-2xl sm:text-3xl font-bold text-ink">{m.name}</h3>
+        <p className="mt-1 text-sm font-semibold text-ink-soft">{m.role}</p>
+        <blockquote className="mt-5 text-lg text-ink-soft leading-relaxed max-w-md">
+          "{m.quote}"
+        </blockquote>
+      </div>
+    </div>
   );
 }
 
@@ -384,8 +505,19 @@ function LeadForm() {
       `Aguardo retorno, obrigado!`
     );
     setTimeout(() => {
-      window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`, "_blank");
-      toast.success("Solicitação enviada! Estamos te redirecionando ao WhatsApp.");
+      const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`;
+      const win = window.open(whatsappUrl, "_blank");
+      if (!win || win.closed) {
+        toast.error("Não foi possível abrir o WhatsApp automaticamente.", {
+          action: {
+            label: "Abrir manualmente",
+            onClick: () => window.open(whatsappUrl, "_blank"),
+          },
+          duration: 10000,
+        });
+      } else {
+        toast.success("Solicitação enviada! Estamos te redirecionando ao WhatsApp.");
+      }
       setForm({ nome: "", telefone: "", email: "", localizacao: "", tipoServico: "", descricao: "" });
       setLoading(false);
     }, 400);
@@ -403,6 +535,9 @@ function LeadForm() {
           <p className="mt-4 text-ink-soft">
             Preencha o formulário ou chame direto no WhatsApp. Sua mensagem chega organizada para o técnico responsável.
           </p>
+          <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-emerald-500/10 text-emerald-700 px-3 py-1.5 text-xs font-semibold">
+            <Clock className="h-3.5 w-3.5" /> Respondemos em até 1 hora no horário comercial
+          </div>
 
           <div className="mt-8 space-y-4">
             <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer"
@@ -421,7 +556,7 @@ function LeadForm() {
               </div>
               <div className="min-w-0">
                 <div className="text-xs uppercase tracking-wider text-muted-foreground">Telefone fixo</div>
-                <div className="font-semibold text-ink">(11) 4002-8922</div>
+                <div className="font-semibold text-ink">(85) 4002-8922</div>
               </div>
             </div>
             <div className="flex items-center gap-4 rounded-2xl border border-border bg-card p-4">
@@ -430,7 +565,7 @@ function LeadForm() {
               </div>
               <div className="min-w-0">
                 <div className="text-xs uppercase tracking-wider text-muted-foreground">Atendimento</div>
-                <div className="font-semibold text-ink">São Paulo e Grande SP</div>
+                <div className="font-semibold text-ink">Fortaleza e Região Metropolitana</div>
               </div>
             </div>
           </div>
@@ -439,7 +574,7 @@ function LeadForm() {
         <form onSubmit={handleSubmit} className="rounded-3xl bg-card border border-border p-6 sm:p-8 shadow-soft">
           <div className="grid sm:grid-cols-2 gap-4">
             <Field label="Nome completo *" value={form.nome} onChange={(v) => update("nome", v)} placeholder="Seu nome" />
-            <Field label="WhatsApp / Telefone *" value={form.telefone} onChange={(v) => update("telefone", v)} placeholder="(11) 99999-9999" />
+            <Field label="WhatsApp / Telefone *" value={form.telefone} onChange={(v) => update("telefone", v)} placeholder="(85) 99999-9999" />
             <Field label="E-mail" value={form.email} onChange={(v) => update("email", v)} placeholder="opcional" type="email" />
             <Field label="Cidade / Localização *" value={form.localizacao} onChange={(v) => update("localizacao", v)} placeholder="Cidade - UF" />
           </div>
@@ -576,7 +711,7 @@ function Footer() {
           <ul className="space-y-2 text-sm">
             <li>{WHATSAPP_DISPLAY}</li>
             <li>contato@joaquimempilhadeiras.com.br</li>
-            <li>São Paulo e Grande SP</li>
+            <li>Fortaleza e Região Metropolitana</li>
             <li>Seg-Sex 08h às 18h · Plantão 24h</li>
           </ul>
         </div>
@@ -584,7 +719,7 @@ function Footer() {
       <div className="border-t border-cream/10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-5 text-xs text-cream/50 flex flex-wrap justify-between gap-3">
           <span>© {new Date().getFullYear()} Joaquim Empilhadeiras. Todos os direitos reservados.</span>
-          <span>CNPJ 00.000.000/0001-00</span>
+          {/* TODO: inserir CNPJ real assim que o cliente enviar — não publicar com número fictício */}
         </div>
       </div>
     </footer>

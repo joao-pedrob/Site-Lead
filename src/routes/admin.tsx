@@ -15,7 +15,7 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
-const WHATSAPP_NUMBER = "5511999999999";
+const WHATSAPP_NUMBER = "5585999999999"; // DDD 85 — Ceará
 
 function AdminPage() {
   const [leads, setLeads] = useState<Lead[]>([]);
