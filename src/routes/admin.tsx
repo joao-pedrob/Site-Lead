@@ -16,8 +16,60 @@ export const Route = createFileRoute("/admin")({
 });
 
 const WHATSAPP_NUMBER = "5585999999999"; // DDD 85 — Ceará
+const ADMIN_PASSWORD = "joaquim2024"; // TODO: mover para variável de ambiente antes de publicar
+const SESSION_KEY = "joaquim:admin-auth";
 
 function AdminPage() {
+  const [authed, setAuthed] = useState(false);
+  const [passwordInput, setPasswordInput] = useState("");
+  const [authError, setAuthError] = useState("");
+
+  useEffect(() => {
+    if (sessionStorage.getItem(SESSION_KEY) === "1") setAuthed(true);
+  }, []);
+
+  function handleLogin(e: React.FormEvent) {
+    e.preventDefault();
+    if (passwordInput === ADMIN_PASSWORD) {
+      sessionStorage.setItem(SESSION_KEY, "1");
+      setAuthed(true);
+      setAuthError("");
+    } else {
+      setAuthError("Senha incorreta");
+    }
+  }
+
+  if (!authed) {
+    return (
+      <div className="min-h-screen bg-cream grid place-items-center px-4">
+        <form onSubmit={handleLogin} className="w-full max-w-sm rounded-2xl border border-border bg-card p-6 shadow-soft">
+          <h1 className="font-display text-xl font-bold text-ink">Painel interno</h1>
+          <p className="mt-1 text-sm text-ink-soft">Acesso restrito. Informe a senha.</p>
+          <label htmlFor="admin-password" className="sr-only">Senha</label>
+          <input
+            id="admin-password"
+            type="password"
+            value={passwordInput}
+            onChange={(e) => setPasswordInput(e.target.value)}
+            autoFocus
+            className="mt-4 w-full rounded-xl border border-input bg-background px-4 py-3 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-ember/40 focus:border-ember"
+          />
+          {authError && <p className="mt-2 text-sm text-destructive">{authError}</p>}
+          <button
+            type="submit"
+            className="mt-4 w-full rounded-xl bg-gradient-ember text-ink font-bold py-3 shadow-ember hover:scale-[1.01] transition-transform"
+          >
+            Entrar
+          </button>
+        </form>
+      </div>
+    );
+  }
+
+  return <AdminDashboard />;
+}
+
+function AdminDashboard() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [filter, setFilter] = useState("");
 
