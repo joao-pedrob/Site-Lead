@@ -220,3 +220,8 @@
     transition: none !important;
   }
 }
+
+/* Shared horizontal alignment across public pages. */
+.site-container { width: 100%; max-width: 80rem; margin-inline: auto; padding-inline: clamp(1rem, 4vw, 2rem); }
+main { min-width: 0; }
+:focus-visible { outline: 2px solid var(--ember); outline-offset: 4px; }

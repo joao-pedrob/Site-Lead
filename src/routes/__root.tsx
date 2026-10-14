@@ -73,9 +73,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Joaquim Empilhadeiras" },
+      { title: "Manutenção elétrica e a combustão" },
       { name: "description", content: "Venda de peças, manutenção preventiva e reparatória para empilhadeiras." },
-      { property: "og:title", content: "Joaquim Empilhadeiras" },
+      { property: "og:title", content: "Manutenção elétrica e a combustão" },
       { property: "og:description", content: "Venda de peças, manutenção preventiva e reparatória para empilhadeiras." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
