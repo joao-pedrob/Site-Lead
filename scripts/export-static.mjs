@@ -17,6 +17,7 @@ for (const route of routes) {
     }
     for (const id of ['servicos', 'como-funciona', 'diferenciais', 'equipe', 'contato']) assert.ok(html.includes(`id="${id}"`), `Missing section ${id}`);
     assert.equal((html.match(/<h1[\s>]/g) || []).length, 1, 'Expected one primary heading');
+    assert.ok(!html.includes('scroll-pending'), 'SSR content must stay visible before animation initializes');
   }
   const directory = `dist/client${route === '/' ? '' : route}`;
   await mkdir(directory, { recursive: true });

@@ -43,7 +43,56 @@ const TIPOS_SERVICO = [
 
 const pages = [{to: '/#topo', label: 'Início'}, {to: '/#servicos', label: 'Serviços'}, {to: '/#diferenciais', label: 'Sobre'}, {to: '/#contato', label: 'Contato'}] as const;
 export function SiteLayout({children}: {children: React.ReactNode}) {
-  return <div className="min-h-screen bg-background text-foreground"><Toaster richColors position="top-center" /><Nav /><main id="conteudo">{children}</main><Footer /><FloatingWhatsapp /></div>;
+  const contentRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const root = contentRef.current;
+    if (!root || typeof IntersectionObserver === 'undefined') return;
+    const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (preference.matches) return;
+    const targets: HTMLElement[] = [];
+    root.querySelectorAll<HTMLElement>('section > .site-container').forEach(container => {
+      Array.from(container.children).forEach(child => {
+        if (!(child instanceof HTMLElement)) return;
+        if (child.classList.contains('grid')) {
+          targets.push(...Array.from(child.children).filter((el): el is HTMLElement => el instanceof HTMLElement));
+        } else targets.push(child);
+      });
+    });
+    const reveal = (element: HTMLElement) => {
+      element.classList.remove('scroll-pending');
+      element.classList.add('scroll-enter');
+    };
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        reveal(entry.target as HTMLElement);
+        observer.unobserve(entry.target);
+      });
+    }, { threshold: 0, rootMargin: '0px 0px -32px 0px' });
+    targets.forEach((element, index) => {
+      element.style.setProperty('--scroll-delay', ((index % 3) * 65) + 'ms');
+      if (element.getBoundingClientRect().top < window.innerHeight - 32) reveal(element);
+      else {
+        element.classList.add('scroll-pending');
+        observer.observe(element);
+      }
+    });
+    const showAll = () => {
+      if (!preference.matches) return;
+      observer.disconnect();
+      targets.forEach(element => element.classList.remove('scroll-pending', 'scroll-enter'));
+    };
+    preference.addEventListener('change', showAll);
+    return () => {
+      observer.disconnect();
+      preference.removeEventListener('change', showAll);
+      targets.forEach(element => {
+        element.classList.remove('scroll-pending', 'scroll-enter');
+        element.style.removeProperty('--scroll-delay');
+      });
+    };
+  }, []);
+  return <div className="min-h-screen bg-background text-foreground"><Toaster richColors position="top-center" /><Nav /><main id="conteudo" ref={contentRef}>{children}</main><Footer /><FloatingWhatsapp /></div>;
 }
 function Nav() {
   const [open, setOpen] = useState(false);
@@ -276,32 +325,6 @@ function WhyUs() {
   );
 }
 
-/* ---------------- REVEAL ON SCROLL ---------------- */
-function useReveal<T extends HTMLElement>() {
-  const ref = useRef<T | null>(null);
-  const [mounted, setMounted] = useState(false);
-  const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    setMounted(true);
-    const el = ref.current;
-    if (!el) return;
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) {
-            setVisible(true);
-            io.disconnect();
-          }
-        });
-      },
-      { threshold: 0.2 },
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-  return { ref, mounted, visible };
-}
-
 /* ---------------- TEAM ---------------- */
 type Member = {
   name: string;
@@ -365,14 +388,11 @@ function Team() {
 }
 
 function TeamRow({ m, index }: { m: Member; index: number }) {
-  const { ref, mounted, visible } = useReveal<HTMLDivElement>();
   const reversed = index % 2 === 1;
   const initials = m.name.split(" ").map((n) => n[0]).slice(0, 2).join("");
 
   return (
-    <div
-      ref={ref}
-      className={`${mounted && !visible ? "reveal-up" : ""} ${visible ? "reveal-up-visible" : ""} site-container py-12 grid lg:grid-cols-2 gap-10 items-center`}
+    <div      className="site-container py-12 grid lg:grid-cols-2 gap-10 items-center"
     >
       <div className={reversed ? "lg:order-2" : ""}>
         {m.img ? (

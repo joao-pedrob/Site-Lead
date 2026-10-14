@@ -203,24 +203,6 @@
 }
 @utility animate-pulse-ring { animation: pulse-ring 2s ease-out infinite; }
 
-@utility reveal-up {
-  opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.55s ease-out, transform 0.55s ease-out;
-}
-@utility reveal-up-visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .reveal-up {
-    opacity: 1 !important;
-    transform: none !important;
-    transition: none !important;
-  }
-}
-
 /* Shared horizontal alignment across public pages. */
 .site-container { width: 100%; max-width: 80rem; margin-inline: auto; padding-inline: clamp(1rem, 4vw, 2rem); }
 main { min-width: 0; }
@@ -229,3 +211,18 @@ main { min-width: 0; }
 /* Keep section headings below the sticky navigation. */
 main section[id] { scroll-margin-top: 7rem; }
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+
+/* Content stays visible without JavaScript; only offscreen items are armed. */
+@keyframes scroll-enter {
+  from { opacity: 0; transform: translateY(28px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .scroll-pending:not(:focus-within) { opacity: 0; transform: translateY(28px); }
+  .scroll-enter { animation: scroll-enter 700ms cubic-bezier(.22, 1, .36, 1) var(--scroll-delay, 0ms) backwards; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto !important; }
+  .scroll-pending, .scroll-enter { opacity: 1 !important; transform: none !important; animation: none !important; }
+  .animate-pulse-ring, .animate-float { animation: none !important; }
+}
