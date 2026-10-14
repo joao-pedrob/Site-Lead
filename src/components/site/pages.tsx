@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { horizontalWheelDelta } from "@/lib/horizontal-scroll";
 import { useEffect, useRef, useState } from "react";
 import {
   Wrench, Cog, ShieldCheck, Truck, Phone, MapPin, MessageCircle,
@@ -44,62 +44,149 @@ const TIPOS_SERVICO = [
 const pages = [{to: '/#topo', label: 'Início'}, {to: '/#servicos', label: 'Serviços'}, {to: '/#diferenciais', label: 'Sobre'}, {to: '/#contato', label: 'Contato'}] as const;
 export function SiteLayout({children}: {children: React.ReactNode}) {
   const contentRef = useRef<HTMLElement>(null);
+  const [active, setActive] = useState(0);
+  const labels = ['Início', 'Serviços', 'Como funciona', 'Sobre', 'Depoimentos', 'Equipe', 'Contato', 'Informações'];
+  const moveTo = (index: number) => {
+    const root = contentRef.current;
+    if (!root) return;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    root.scrollTo({left: Math.max(0, Math.min(labels.length - 1, index)) * root.clientWidth, behavior: reduced ? 'instant' : 'smooth'});
+  };
   useEffect(() => {
     const root = contentRef.current;
-    if (!root || typeof IntersectionObserver === 'undefined') return;
+    if (!root) return;
     const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
-    if (preference.matches) return;
-    const targets: HTMLElement[] = [];
-    root.querySelectorAll<HTMLElement>('section > .site-container').forEach(container => {
-      Array.from(container.children).forEach(child => {
-        if (!(child instanceof HTMLElement)) return;
-        if (child.classList.contains('grid')) {
-          targets.push(...Array.from(child.children).filter((el): el is HTMLElement => el instanceof HTMLElement));
-        } else targets.push(child);
-      });
-    });
-    const reveal = (element: HTMLElement) => {
-      element.classList.remove('scroll-pending');
-      element.classList.add('scroll-enter');
-    };
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (!entry.isIntersecting) return;
-        reveal(entry.target as HTMLElement);
-        observer.unobserve(entry.target);
-      });
-    }, { threshold: 0, rootMargin: '0px 0px -32px 0px' });
-    targets.forEach((element, index) => {
-      element.style.setProperty('--scroll-delay', ((index % 3) * 65) + 'ms');
-      if (element.getBoundingClientRect().top < window.innerHeight - 32) reveal(element);
-      else {
-        element.classList.add('scroll-pending');
-        observer.observe(element);
+    let wheelTotal = 0;
+    let lastWheelAt = 0;
+    let wheelLockedUntil = 0;
+    const onWheel = (event: WheelEvent) => {
+      const target = event.target instanceof Element ? event.target : null;
+      const panel = target?.closest<HTMLElement>('.horizontal-panel');
+      let canScrollVertically = false;
+      for (let element = target; element && element !== root; element = element.parentElement) {
+        const style = getComputedStyle(element);
+        if (!/(auto|scroll)/.test(style.overflowY)) continue;
+        if (element.scrollHeight <= element.clientHeight + 1) continue;
+        if (event.deltaY > 0 ? element.scrollTop + element.clientHeight < element.scrollHeight - 2 : element.scrollTop > 2) {
+          canScrollVertically = true;
+          break;
+        }
+        if (element === panel) break;
       }
+      const delta = horizontalWheelDelta({deltaX: event.deltaX, deltaY: event.deltaY, deltaMode: event.deltaMode, width: root.clientWidth, controlKey: event.ctrlKey, interactive: !!target?.closest('textarea, input, select, [role="listbox"], [role="option"]'), canScrollVertically});
+      if (delta === null) return;
+      event.preventDefault();
+      const now = Date.now();
+      if (now < wheelLockedUntil) return;
+      if (now - lastWheelAt > 180) wheelTotal = 0;
+      lastWheelAt = now;
+      wheelTotal += delta;
+      if (Math.abs(wheelTotal) < 40) return;
+      const next = Math.max(0, Math.min(root.children.length - 1, Math.round(root.scrollLeft / root.clientWidth) + Math.sign(wheelTotal)));
+      root.scrollTo({left: next * root.clientWidth, behavior: preference.matches ? 'instant' : 'smooth'});
+      wheelTotal = 0;
+      wheelLockedUntil = now + 650;
+    };
+    const syncHash = () => {
+      const id = window.location.hash.slice(1);
+      const target = id ? document.getElementById(id) : null;
+      const panel = target?.closest<HTMLElement>('.horizontal-panel');
+      if (!panel || !root.contains(panel)) return;
+      root.scrollTo({left: panel.offsetLeft - root.offsetLeft, behavior: preference.matches ? 'instant' : 'smooth'});
+    };
+    const onLink = (event: MouseEvent) => {
+      if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+      const target = event.target instanceof Element ? event.target.closest('a') : null;
+      if (!target || target.target === '_blank') return;
+      const url = new URL(target.href, window.location.href);
+      if (url.origin !== location.origin || url.pathname !== '/' || !url.hash) return;
+      const destination = document.getElementById(url.hash.slice(1));
+      if (!destination || !root.contains(destination)) return;
+      event.preventDefault();
+      history.replaceState(history.state, '', url.hash);
+      syncHash();
+    };
+    let frame = 0;
+    const onScroll = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => setActive(Math.round(root.scrollLeft / root.clientWidth)));
+    };
+    const onResize = () => {
+      const index = Math.round(root.scrollLeft / root.clientWidth);
+      root.scrollTo({left: index * root.clientWidth, behavior: 'instant'});
+      onScroll();
+    };
+    const resize = new ResizeObserver(onResize);
+    resize.observe(root);
+    root.addEventListener('wheel', onWheel, {passive: false});
+    root.addEventListener('scroll', onScroll, {passive: true});
+    document.addEventListener('click', onLink);
+    window.addEventListener('hashchange', syncHash);
+    const initialFrame = requestAnimationFrame(syncHash);
+    const targets = Array.from(root.querySelectorAll<HTMLElement>('section > .site-container > *, .horizontal-panel > .site-container > *'));
+    const observer = typeof IntersectionObserver !== 'undefined' ? new IntersectionObserver(entries => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        entry.target.classList.remove('scroll-pending');
+        entry.target.classList.add('scroll-enter');
+        observer?.unobserve(entry.target);
+      }
+    }, {root, threshold: 0, rootMargin: '0px -24px 0px 0px'}) : null;
+    if (!preference.matches && observer) targets.forEach((element, index) => {
+      element.style.setProperty('--scroll-delay', ((index % 3) * 65) + 'ms');
+      element.classList.add('scroll-pending');
+      observer.observe(element);
     });
     const showAll = () => {
       if (!preference.matches) return;
-      observer.disconnect();
+      observer?.disconnect();
       targets.forEach(element => element.classList.remove('scroll-pending', 'scroll-enter'));
     };
     preference.addEventListener('change', showAll);
     return () => {
-      observer.disconnect();
+      root.removeEventListener('wheel', onWheel);
+      root.removeEventListener('scroll', onScroll);
+      document.removeEventListener('click', onLink);
+      window.removeEventListener('hashchange', syncHash);
       preference.removeEventListener('change', showAll);
+      cancelAnimationFrame(frame);
+      cancelAnimationFrame(initialFrame);
+      resize.disconnect();
+      observer?.disconnect();
       targets.forEach(element => {
         element.classList.remove('scroll-pending', 'scroll-enter');
         element.style.removeProperty('--scroll-delay');
       });
     };
   }, []);
-  return <div className="min-h-screen bg-background text-foreground"><Toaster richColors position="top-center" /><Nav /><main id="conteudo" ref={contentRef}>{children}</main><Footer /><FloatingWhatsapp /></div>;
+  return <><Toaster richColors position="top-center" /><div className="horizontal-site bg-background text-foreground">
+    <Nav />
+    <main id="conteudo" ref={contentRef} className="horizontal-track" tabIndex={0} aria-label="Conteúdo com rolagem horizontal" onKeyDown={event => {
+      if ((event.target as HTMLElement).closest('input, textarea, select, button, a, [role="combobox"], [contenteditable]') || event.altKey || event.ctrlKey || event.metaKey) return;
+      if (event.key === 'ArrowRight' || event.key === 'PageDown') { event.preventDefault(); moveTo(active + 1); }
+      if (event.key === 'ArrowLeft' || event.key === 'PageUp') { event.preventDefault(); moveTo(active - 1); }
+      if (event.key === 'Home') { event.preventDefault(); moveTo(0); }
+      if (event.key === 'End') { event.preventDefault(); moveTo(labels.length - 1); }
+    }}>{children}<div className="horizontal-panel footer-panel"><Footer /></div></main>
+    <nav className="scroll-controls" aria-label="Navegar pelas telas">
+      <span className="text-xs text-muted-foreground hidden sm:block">Role para explorar <ArrowRight className="inline h-3 w-3" /></span>
+      <div className="flex items-center gap-2 sm:gap-4">
+        <button type="button" onClick={() => moveTo(active - 1)} disabled={active === 0} aria-label="Tela anterior" className="scroll-button"><ArrowRight className="h-4 w-4 rotate-180" /></button>
+        <span className="text-sm min-w-32 text-center" aria-live="polite"><strong>{String(active + 1).padStart(2, '0')}</strong> / {labels.length} · {labels[active]}</span>
+        <button type="button" onClick={() => moveTo(active + 1)} disabled={active === labels.length - 1} aria-label="Próxima tela" className="scroll-button"><ArrowRight className="h-4 w-4" /></button>
+      </div>
+      <div className="scroll-progress" aria-hidden="true"><span style={{width: ((active + 1) / labels.length * 100) + '%'}} /></div>
+    </nav>
+    <FloatingWhatsapp />
+  </div></>;
 }
+
 function Nav() {
   const [open, setOpen] = useState(false);
   return <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border">
     <a href="#conteudo" className="sr-only focus:not-sr-only focus:block focus:p-3">Pular para o conteúdo</a>
     <div className="site-container flex min-h-20 items-center justify-between gap-4 py-3">
-      <Link to="/" onClick={() => setOpen(false)} className="flex min-w-0 items-center gap-3"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-gradient-ember"><Truck className="h-5 w-5 text-ink" /></span><span className="font-display font-bold text-ink text-lg sm:text-xl leading-tight max-w-64">Manutenção elétrica e a combustão</span></Link>
+      <a href="/#topo" onClick={() => setOpen(false)} className="flex min-w-0 items-center gap-3"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-gradient-ember"><Truck className="h-5 w-5 text-ink" /></span><span className="font-display font-bold text-ink text-lg sm:text-xl leading-tight max-w-64">Manutenção elétrica e a combustão</span></a>
       <nav aria-label="Navegação principal" className="hidden md:flex items-center gap-6 text-sm font-semibold">{pages.map(p => <a key={p.to} href={p.to} className="py-2 hover:text-ember">{p.label}</a>)}</nav>
       <a href={'https://wa.me/' + WHATSAPP_NUMBER} target="_blank" rel="noopener noreferrer" className="hidden lg:inline-flex items-center gap-2 rounded-full bg-ink text-cream px-4 py-2 text-sm font-semibold"><MessageCircle className="h-4 w-4" /> WhatsApp</a>
       <button type="button" aria-label={open ? 'Fechar menu' : 'Abrir menu'} aria-expanded={open} aria-controls="menu-mobile" onClick={() => setOpen(!open)} className="md:hidden rounded-lg border border-border p-3 shrink-0">{open ? 'Fechar' : 'Menu'}</button>
@@ -107,7 +194,7 @@ function Nav() {
     {open && <nav id="menu-mobile" aria-label="Navegação no celular" className="site-container md:hidden flex flex-col pb-4">{pages.map(p => <a key={p.to} href={p.to} onClick={() => setOpen(false)} className="rounded-lg px-3 py-3 font-semibold hover:bg-muted">{p.label}</a>)}</nav>}
   </header>;
 }
-export function HomePage() { return <SiteLayout><Hero /><LogosStrip /><Services /><HowItWorks /><WhyUs /><Testimonials /><Team /><LeadForm /></SiteLayout>; }
+export function HomePage() { return <SiteLayout><div className="horizontal-panel intro-panel"><Hero /><LogosStrip /></div><div className="horizontal-panel"><Services /></div><div className="horizontal-panel"><HowItWorks /></div><div className="horizontal-panel"><WhyUs /></div><div className="horizontal-panel"><Testimonials /></div><div className="horizontal-panel"><Team /></div><div className="horizontal-panel"><LeadForm /></div></SiteLayout>; }
 /* ---------------- HERO ---------------- */
 function Hero() {
   return (

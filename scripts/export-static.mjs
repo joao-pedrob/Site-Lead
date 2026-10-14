@@ -17,6 +17,8 @@ for (const route of routes) {
     }
     for (const id of ['servicos', 'como-funciona', 'diferenciais', 'equipe', 'contato']) assert.ok(html.includes(`id="${id}"`), `Missing section ${id}`);
     assert.equal((html.match(/<h1[\s>]/g) || []).length, 1, 'Expected one primary heading');
+    assert.match(html, /class="horizontal-track"/);
+    assert.equal((html.match(/class="horizontal-panel(?: [^"]*)?"/g) || []).length, 8, 'All sections must be horizontal panels');
     assert.ok(!html.includes('scroll-pending'), 'SSR content must stay visible before animation initializes');
   }
   const directory = `dist/client${route === '/' ? '' : route}`;
