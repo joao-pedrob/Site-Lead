@@ -41,7 +41,7 @@ const TIPOS_SERVICO = [
 ];
 
 
-const pages = [{to: '/', label: 'Início'}, {to: '/servicos', label: 'Serviços'}, {to: '/sobre', label: 'Sobre'}, {to: '/contato', label: 'Contato'}] as const;
+const pages = [{to: '/#topo', label: 'Início'}, {to: '/#servicos', label: 'Serviços'}, {to: '/#diferenciais', label: 'Sobre'}, {to: '/#contato', label: 'Contato'}] as const;
 export function SiteLayout({children}: {children: React.ReactNode}) {
   return <div className="min-h-screen bg-background text-foreground"><Toaster richColors position="top-center" /><Nav /><main id="conteudo">{children}</main><Footer /><FloatingWhatsapp /></div>;
 }
@@ -51,23 +51,14 @@ function Nav() {
     <a href="#conteudo" className="sr-only focus:not-sr-only focus:block focus:p-3">Pular para o conteúdo</a>
     <div className="site-container flex min-h-20 items-center justify-between gap-4 py-3">
       <Link to="/" onClick={() => setOpen(false)} className="flex min-w-0 items-center gap-3"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-gradient-ember"><Truck className="h-5 w-5 text-ink" /></span><span className="font-display font-bold text-ink text-lg sm:text-xl leading-tight max-w-64">Manutenção elétrica e a combustão</span></Link>
-      <nav aria-label="Navegação principal" className="hidden md:flex items-center gap-6 text-sm font-semibold">{pages.map(p => <Link key={p.to} to={p.to} activeOptions={{exact: true}} activeProps={{className: 'text-ember underline underline-offset-8'}} className="py-2 hover:text-ember">{p.label}</Link>)}</nav>
+      <nav aria-label="Navegação principal" className="hidden md:flex items-center gap-6 text-sm font-semibold">{pages.map(p => <a key={p.to} href={p.to} className="py-2 hover:text-ember">{p.label}</a>)}</nav>
       <a href={'https://wa.me/' + WHATSAPP_NUMBER} target="_blank" rel="noopener noreferrer" className="hidden lg:inline-flex items-center gap-2 rounded-full bg-ink text-cream px-4 py-2 text-sm font-semibold"><MessageCircle className="h-4 w-4" /> WhatsApp</a>
       <button type="button" aria-label={open ? 'Fechar menu' : 'Abrir menu'} aria-expanded={open} aria-controls="menu-mobile" onClick={() => setOpen(!open)} className="md:hidden rounded-lg border border-border p-3 shrink-0">{open ? 'Fechar' : 'Menu'}</button>
     </div>
-    {open && <nav id="menu-mobile" aria-label="Navegação no celular" className="site-container md:hidden flex flex-col pb-4">{pages.map(p => <Link key={p.to} to={p.to} onClick={() => setOpen(false)} activeOptions={{exact:true}} activeProps={{className:'text-ember bg-ember/5'}} className="rounded-lg px-3 py-3 font-semibold hover:bg-muted">{p.label}</Link>)}</nav>}
+    {open && <nav id="menu-mobile" aria-label="Navegação no celular" className="site-container md:hidden flex flex-col pb-4">{pages.map(p => <a key={p.to} href={p.to} onClick={() => setOpen(false)} className="rounded-lg px-3 py-3 font-semibold hover:bg-muted">{p.label}</a>)}</nav>}
   </header>;
 }
-export function HomePage() { return <SiteLayout><Hero /><LogosStrip /><Testimonials /><ContactCallout /></SiteLayout>; }
-export function ServicesPage() { return <SiteLayout><PageHeading title="Serviços para sua empilhadeira" description="Manutenção elétrica e a combustão, peças e reparos para manter sua operação em movimento." /><Services /><HowItWorks /><ContactCallout /></SiteLayout>; }
-export function AboutPage() { return <SiteLayout><PageHeading title="Sobre a nossa oficina" description="Conheça a história e a equipe da Joaquim. Atendimento próximo, experiência e compromisso com sua operação." /><WhyUs /><Team /><ContactCallout /></SiteLayout>; }
-export function ContactPage() { return <SiteLayout><LeadForm /></SiteLayout>; }
-function PageHeading({title, description}: {title: string; description: string}) {
-  return <section className="border-b border-border bg-cream py-12 sm:py-16"><div className="site-container grid md:grid-cols-2 items-center gap-6"><h1 className="text-4xl sm:text-5xl font-bold text-ink">{title}</h1><p className="text-lg leading-relaxed text-ink-soft">{description}</p></div></section>;
-}
-function ContactCallout() {
-  return <section className="bg-cream border-t border-border py-12"><div className="site-container flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6"><div><h2 className="text-3xl font-bold text-ink">Vamos cuidar da sua empilhadeira?</h2><p className="mt-2 text-ink-soft">Conte o que precisa e solicite seu orçamento.</p></div><Link to="/contato" className="inline-flex self-start shrink-0 items-center gap-2 rounded-full bg-ink px-6 py-3 font-semibold text-cream">Entrar em contato <ArrowRight className="h-4 w-4" /></Link></div></section>;
-}
+export function HomePage() { return <SiteLayout><Hero /><LogosStrip /><Services /><HowItWorks /><WhyUs /><Testimonials /><Team /><LeadForm /></SiteLayout>; }
 /* ---------------- HERO ---------------- */
 function Hero() {
   return (
@@ -98,7 +89,7 @@ function Hero() {
               className="group inline-flex items-center gap-2 rounded-full bg-gradient-ember text-ink px-6 py-3.5 text-sm font-semibold shadow-ember hover:scale-[1.02] transition-transform">
               <MessageCircle className="h-4 w-4" /> Falar no WhatsApp
             </a>
-            <a href="/contato" className="group inline-flex items-center gap-2 rounded-full border border-ink/15 text-ink px-6 py-3.5 text-sm font-semibold hover:bg-ink/5 transition-colors">
+            <a href="/#contato" className="group inline-flex items-center gap-2 rounded-full border border-ink/15 text-ink px-6 py-3.5 text-sm font-semibold hover:bg-ink/5 transition-colors">
               Solicitar orçamento
               <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
             </a>
@@ -193,7 +184,7 @@ function Services() {
                 <p className={`mt-2 text-sm text-ink-soft transition-colors leading-relaxed ${it.img ? "group-hover:text-cream/80" : ""}`}>
                   {it.desc}
                 </p>
-                <a href="/contato" className="mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-ember group-hover:text-amber">
+                <a href="/#contato" className="mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-ember group-hover:text-amber">
                   Solicitar <ArrowRight className="h-4 w-4" />
                 </a>
               </div>
@@ -462,7 +453,7 @@ function LeadForm() {
       <div className="absolute -top-32 right-0 h-96 w-96 bg-gradient-ember opacity-20 rounded-full blur-3xl" />
       <div className="relative site-container grid lg:grid-cols-[1fr_1.1fr] gap-12 items-start">
         <div className="lg:sticky lg:top-24">
-          <h1 className="text-4xl sm:text-5xl font-bold text-ink text-balance">Fale com a nossa equipe.</h1>
+          <h2 className="text-4xl sm:text-5xl font-bold text-ink text-balance">Fale com a nossa equipe.</h2>
           <p className="mt-4 text-ink-soft">
             Preencha o formulário ou chame direto no WhatsApp. Sua mensagem chega organizada para o técnico responsável.
           </p>
@@ -630,10 +621,10 @@ function Footer() {
         <div>
           <h4 className="font-display font-semibold text-cream mb-4">Serviços</h4>
           <ul className="space-y-2 text-sm">
-            <li><a href="/servicos" className="hover:text-ember">Venda de peças</a></li>
-            <li><a href="/servicos" className="hover:text-ember">Manutenção preventiva</a></li>
-            <li><a href="/servicos" className="hover:text-ember">Reparos emergenciais</a></li>
-            <li><a href="/servicos" className="hover:text-ember">Diagnóstico técnico</a></li>
+            <li><a href="/#servicos" className="hover:text-ember">Venda de peças</a></li>
+            <li><a href="/#servicos" className="hover:text-ember">Manutenção preventiva</a></li>
+            <li><a href="/#servicos" className="hover:text-ember">Reparos emergenciais</a></li>
+            <li><a href="/#servicos" className="hover:text-ember">Diagnóstico técnico</a></li>
           </ul>
         </div>
         <div>

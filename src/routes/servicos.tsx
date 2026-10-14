@@ -1,10 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { ServicesPage } from "@/components/site/pages";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+
 export const Route = createFileRoute("/servicos")({
- head: () => ({meta: [
-  {title: "Serviços | Manutenção elétrica e a combustão"},
-  {name: "description", content: "Manutenção elétrica e a combustão de empilhadeiras, peças e reparos em Fortaleza e região metropolitana. Solicite seu orçamento."},
-  {property: "og:title", content: "Serviços | Manutenção elétrica e a combustão"},
- ]}),
- component: ServicesPage,
+  beforeLoad: () => { throw redirect({ to: "/", hash: "servicos", replace: true }); },
 });
